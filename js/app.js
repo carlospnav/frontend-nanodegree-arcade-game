@@ -1,12 +1,13 @@
-//Entities is Player and Enemy's base class
-var Entity = function(sprite, position){
+/*Entities is Player and Enemy's base class. It takes a  sprite url,
+an object with x and y values and a hitbox object with sizeX and sizeY dimensions*/
+var Entity = function(sprite, position, hitbox){
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
     this.x = position.x;
     this.y = position.y;
+    this.hitbox = hitbox;
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
-    // this.sprite = 'images/enemy-bug.png';
     this.sprite = sprite;
 }
 Entity.prototype = { 
@@ -18,8 +19,9 @@ Entity.prototype = {
 
 
 // Enemies our player must avoid
-var Enemy = function(position) {
-    Entity.call(this, 'images/enemy-bug.png', position);
+var Enemy = function(position, hitbox) {
+    this.speed = this.speedChange();
+    Entity.call(this, 'images/enemy-bug.png', position, hitbox);
 };
 
 Enemy.prototype = Object.create(Entity.prototype, {
@@ -29,7 +31,12 @@ Enemy.prototype = Object.create(Entity.prototype, {
         // You should multiply any movement by the dt parameter
         // which will ensure the game runs at the same speed for
         // all computers.
-        // this.x += 50 * dt;
+        this.x += 500 * dt * this.speed;
+    }},
+    speedChange : { value: function(){
+        var speed = Math.random() + 0.1;
+        this.speed = speed;
+        return speed;
     }}
 });
 Enemy.prototype.constructor = Enemy;
@@ -37,17 +44,25 @@ Enemy.prototype.constructor = Enemy;
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
-var Player = function() {
-
-    Entity.call(this, 'images/char-boy.png', { x: 205, y: 380 });
-    this.update = function(){
-
-    };
+var Player = function(hitbox) {
+    Entity.call(this, 'images/char-boy.png', { x: 205, y: 380 }, hitbox);
 };
 
 Player.prototype = Object.create(Entity.prototype, {
     update : { value: function(){
 
+    }},
+    checkCollision: { value: function(enemy){
+        var collision;
+        if ((player.x + this.hitbox.sizeX) > enemy.x && player.x < (enemy.x + enemy.hitbox.sizeX) 
+        &&
+           ((player.y + this.hitbox.sizeY) > enemy.y && player.y < (enemy.y + enemy.hitbox.sizeY)))
+           {
+                collision = true;
+        }
+        else
+            collision = false;
+        return collision;
     }},
     handleInput: { value: function(keyCode){
         var axis,

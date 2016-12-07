@@ -79,7 +79,7 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        // checkCollisions();
+        checkCollisions();
         checkWinCondition();
     }
 
@@ -97,6 +97,19 @@ var Engine = (function(global) {
         player.update();
     }
 
+    function checkCollisions(){
+        allEnemies.forEach(function(enemy){
+            if (enemy.x > 505){
+                enemy.x = -95;
+                enemy.speedChange();
+            }
+            // if (((player.x + 80) > enemy.x && player.x < (enemy.x + 80)) && ((player.y + 80) > enemy.y && player.y < (enemy.y + 80))) {
+                // console.log("colisão!");
+            if (player.checkCollision(enemy)){
+                reset();
+            }
+        });
+    }
     /*Checks to determine whether the player has entered the win condition zone.
     * If successful, it will reset the entities and assign points to the player.
     */
@@ -170,8 +183,9 @@ var Engine = (function(global) {
     function reset() {
         /* Resets the game to start condition by reassigning the variables to 
         new instances, flagging the old ones for garbage collection. */
-        allEnemies = [ new Enemy({ x : 0, y : 40}), new Enemy({ x : 0, y : 125}), new Enemy({ x : 0, y : 210}) ];
-        player = new Player();
+        var defaultHitbox = {sizeX: 80, sizeY: 80};
+        allEnemies = [ new Enemy({ x : 0, y : 40}, defaultHitbox), new Enemy({ x : 0, y : 125}, defaultHitbox), new Enemy({ x : 0, y : 210}, defaultHitbox) ];
+        player = new Player(defaultHitbox);
     }
 
     /* Go ahead and load all of the images we know we're going to need to
