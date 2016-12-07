@@ -28,7 +28,6 @@ var Engine = (function(global) {
     canvas.width = 505;
     canvas.height = 606;
     doc.body.appendChild(canvas);
-
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
      */
@@ -81,6 +80,7 @@ var Engine = (function(global) {
     function update(dt) {
         updateEntities(dt);
         // checkCollisions();
+        checkWinCondition();
     }
 
     /* This is called by the update function and loops through all of the
@@ -95,6 +95,15 @@ var Engine = (function(global) {
             enemy.update(dt);
         });
         player.update();
+    }
+
+    /*Checks to determine whether the player has entered the win condition zone.
+    * If successful, it will reset the entities and assign points to the player.
+    */
+    function checkWinCondition(){
+        if (player.y < 0){
+            reset();
+        }
     }
 
     /* This function initially draws the "game level", it will then call
@@ -159,7 +168,10 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+        /* Resets the game to start condition by reassigning the variables to 
+        new instances, flagging the old ones for garbage collection. */
+        allEnemies = [ new Enemy({ x : 0, y : 40}), new Enemy({ x : 0, y : 125}), new Enemy({ x : 0, y : 210}) ];
+        player = new Player();
     }
 
     /* Go ahead and load all of the images we know we're going to need to
