@@ -10,7 +10,7 @@ var Entity = function(sprite, position, hitbox){
     // a helper we've provided to easily load images
     this.sprite = sprite;
 }
-Entity.prototype = { 
+Entity.prototype = {
     // Draw the enemy on the screen, required method for game
     "render" : function(){
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -31,6 +31,7 @@ Enemy.prototype = Object.create(Entity.prototype, {
         // You should multiply any movement by the dt parameter
         // which will ensure the game runs at the same speed for
         // all computers.
+        // Ps: I decided to move collision handling to Player. 
         this.x += 500 * dt * this.speed;
     }},
     speedChange : { value: function(){
@@ -45,25 +46,28 @@ Enemy.prototype.constructor = Enemy;
 // This class requires an update(), render() and
 // a handleInput() method.
 var Player = function(hitbox) {
-    Entity.call(this, 'images/char-boy.png', { x: 205, y: 380 }, hitbox);
+    Entity.call(this, 'images/char-boy.png', {x: 205, y: 380}, hitbox);
 };
 
 Player.prototype = Object.create(Entity.prototype, {
+    // In the future, this would be the place to add more functionalities to the player.
     update : { value: function(){
 
     }},
+    // Checks for collisions with enemies passed as parameter to the function. If it detects
+    // a collision, returns true. Otherwise, false.
     checkCollision: { value: function(enemy){
         var collision;
-        if ((player.x + this.hitbox.sizeX) > enemy.x && player.x < (enemy.x + enemy.hitbox.sizeX) 
+        ((player.x + this.hitbox.sizeX) > enemy.x && player.x < (enemy.x + enemy.hitbox.sizeX) 
         &&
-           ((player.y + this.hitbox.sizeY) > enemy.y && player.y < (enemy.y + enemy.hitbox.sizeY)))
-           {
-                collision = true;
-        }
-        else
-            collision = false;
+        ((player.y + this.hitbox.sizeY) > enemy.y && player.y < (enemy.y + enemy.hitbox.sizeY)))
+        ?
+        collision = true : collision = false;
         return collision;
     }},
+    // Handles the way the player object responds to input such as key presses
+    // and sends the axis in which the player is attempting to move to the function
+    // that checks for moves out of the boundaries of the board. 
     handleInput: { value: function(keyCode){
         var axis,
             xIncrement = 100,
@@ -71,32 +75,34 @@ Player.prototype = Object.create(Entity.prototype, {
         switch(keyCode){
             case 'left':
                 this.x -= xIncrement;
-                axis = "x";
+                axis = 'x';
                 break;
             case 'up':
                 this.y -= yIncrement;
-                axis = "y";
+                axis = 'y';
                 break;
             case 'right':
                 this.x += xIncrement;
-                axis = "x";
+                axis = 'x';
                 break;
             case 'down':
                 this.y += yIncrement;
-                axis = "y";
+                axis = 'y';
                 break;
         }
         this.checkBoundaries(axis);
     }},
+    //Checks whether the player is attempting to leave the field
+    //and prevents that move.
     checkBoundaries: { value: function(axis){
         switch(axis){
-            case "x":
+            case 'x':
                 if (this[axis] < 5)
                     this[axis] = 5;
                 else if (this[axis] > 405)
                     this[axis] = 405;
                 break;
-            case "y":
+            case 'y':
                 if (this[axis] < -45)
                     this[axis] = -45;
                 else if(this[axis] > 380)
@@ -110,6 +116,8 @@ Player.prototype.constructor = Player;
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
+// The entities are being instantiated inside Engine to 
+// facilitate board resets.
 
 var allEnemies, player;
 

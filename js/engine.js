@@ -23,7 +23,9 @@ var Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
+        paused = false,
         lastTime;
+
 
     canvas.width = 505;
     canvas.height = 606;
@@ -44,8 +46,10 @@ var Engine = (function(global) {
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
-        update(dt);
-        render();
+        if (paused === false){
+            update(dt);
+            render();
+        }
 
         /* Set our lastTime variable which is used to determine the time delta
          * for the next time this function is called.
@@ -97,26 +101,75 @@ var Engine = (function(global) {
         player.update();
     }
 
+    /*Determines collision between entities in the game and the edges of 
+    the map for enemies.
+    */
     function checkCollisions(){
         allEnemies.forEach(function(enemy){
+            //Reset enemies when they cross the edge of the map.
             if (enemy.x > 505){
                 enemy.x = -95;
                 enemy.speedChange();
             }
-            // if (((player.x + 80) > enemy.x && player.x < (enemy.x + 80)) && ((player.y + 80) > enemy.y && player.y < (enemy.y + 80))) {
-                // console.log("colisão!");
+            /* Displays defeat message and resets the game if the player collides with the enemy.
+            * I decided to use the player entity to check itself for collisions. It seemed natural
+            * to me to have the single entity check itself against the many different ones instead of 
+            * the other way around.
+            */
             if (player.checkCollision(enemy)){
-                reset();
+                paused = true;
+                //Draws the victory text on screen after a small delay.
+                var defeatText = setTimeout(function(){
+                    drawEndgameText(false);
+                }, 500);
+                //Resets the game after a delay.
+                setTimeout(function(){
+                    reset();
+                }, 3000);
             }
         });
     }
+
     /*Checks to determine whether the player has entered the win condition zone.
-    * If successful, it will reset the entities and assign points to the player.
+    * If successful, it will reset the entities and display the victory text.
     */
     function checkWinCondition(){
         if (player.y < 0){
-            reset();
+            paused = true;
+            //Draws the victory text on screen after a small delay.
+            var victoryText = setTimeout(function(){
+                drawEndgameText(true);
+            }, 500);
+            //Resets the game after a delay.
+            setTimeout(function(){
+                reset();
+            }, 3000);
         }
+    }
+
+    /*Sets the Text configuration for victory or defeat and draws it on the screen.
+    */
+    function drawEndgameText(victoryOrDefeat){
+        var text;
+        ctx.textAlign = 'center';
+        ctx.lineWidth = 1;
+        ctx.font= '72px impact';
+        //Sets victory text configuration.
+        if (victoryOrDefeat){
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'black';
+            text = 'Victory!';
+        }
+        //Sets Defeat text configuration.
+        else{
+            ctx.fillStyle = 'red';
+            ctx.strokeStyle = 'white';
+            text = 'Defeat!';
+        }
+            //Draws the text on screen.
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+            ctx.lineWidth = 2;
+            ctx.strokeText(text, canvas.width /2, canvas.height / 2);
     }
 
     /* This function initially draws the "game level", it will then call
@@ -126,6 +179,10 @@ var Engine = (function(global) {
      * they are just drawing the entire screen over and over.
      */
     function render() {
+        /*This clears the canvas before redrawing it. Doing so removes lingering
+        elements drawn outside the board. 
+        */
+        canvas.width = canvas.width;
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
          */
@@ -184,8 +241,9 @@ var Engine = (function(global) {
         /* Resets the game to start condition by reassigning the variables to 
         new instances, flagging the old ones for garbage collection. */
         var defaultHitbox = {sizeX: 80, sizeY: 80};
-        allEnemies = [ new Enemy({ x : 0, y : 40}, defaultHitbox), new Enemy({ x : 0, y : 125}, defaultHitbox), new Enemy({ x : 0, y : 210}, defaultHitbox) ];
+        allEnemies = [ new Enemy({x : 0, y : 40}, defaultHitbox), new Enemy({x : 0, y : 125}, defaultHitbox), new Enemy({x : 0, y : 210}, defaultHitbox) ];
         player = new Player(defaultHitbox);
+        paused = false;
     }
 
     /* Go ahead and load all of the images we know we're going to need to
