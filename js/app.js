@@ -57,12 +57,11 @@ Player.prototype = Object.create(Entity.prototype, {
     // Checks for collisions with enemies passed as parameter to the function. If it detects
     // a collision, returns true. Otherwise, false.
     checkCollision: { value: function(enemy){
-        var collision;
-        ((player.x + this.hitbox.sizeX) > enemy.x && player.x < (enemy.x + enemy.hitbox.sizeX) 
-        &&
-        ((player.y + this.hitbox.sizeY) > enemy.y && player.y < (enemy.y + enemy.hitbox.sizeY)))
-        ?
-        collision = true : collision = false;
+        var collision,
+        horizontalCollision = (player.x + this.hitbox.sizeX) > enemy.x && player.x < (enemy.x + enemy.hitbox.sizeX),
+        verticalCollision = (player.y + this.hitbox.sizeY) > enemy.y && player.y < (enemy.y + enemy.hitbox.sizeY);
+        
+        (horizontalCollision && verticalCollision) ? collision =true : collision = false;
         return collision;
     }},
     // Handles the way the player object responds to input such as key presses
